@@ -162,7 +162,7 @@ export type CategoricalSeriesAttributes = CartesianSeriesAttributes & {
     stackMode?: ChartSeriesStackMode;
 };
 
-// visualization\views\chart-axis.common.d.ts
+// visualization/views/chart-axis.common.d.ts
 export type ChartAxisLabelAttributes = ViewAttributes & {
     fitMode?: ChartPublicEnumChartAxisLabelFitMode;
     format?: string;
@@ -211,7 +211,7 @@ export type ChartSeriesAttributes = ViewBaseAttributes & {
     valueProperty?: string | any;
 };
 
-// visualization\views\chart-series.common.d.ts
+// visualization/views/chart-series.common.d.ts
 export type ChartSeriesLabelAttributes = ViewAttributes & {
     format?: string;
     onFormatChange?: (args: PropertyChangeData) => void;
