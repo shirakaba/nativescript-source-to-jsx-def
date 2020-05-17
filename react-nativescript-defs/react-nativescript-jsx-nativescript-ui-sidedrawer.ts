@@ -28,3 +28,21 @@ export type RadSideDrawerAttributes = ViewAttributes & {
 
 
 
+
+
+import { registerElement, NSVElement, NSVViewFlags } from "react-nativescript";
+
+registerElement(
+    'radSideDrawer',
+    () => require('nativescript-ui-sidedrawer')["RadSideDrawer"],
+        {
+      nodeOps: {
+        insert(child: NSVElement, parent: NSVElement, atIndex?: number): void {
+          // You need to fill this in!
+        },
+        remove(child: NSVElement, parent: NSVElement): void {
+          // You need to fill this in!
+        }
+      }
+    }
+);

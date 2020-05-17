@@ -17,6 +17,65 @@ class ReactJSXDocumentRenderer extends JSXDocumentRenderer {
     renderJSXNamespace(intrinsicElements: IntrinsicElementDefinition[]) {
         return ''
     }
+
+    /**
+     * This will render the React implementation for the plugin, based on an existing NativeScript Core plugin.
+     * 
+     * @param packageName - The name of the package as it is on npm, e.g. "nativescript-ui-sidedrawer"
+     * @param exportName - The name of the export from the package, e.g. "RadSideDrawer"
+     * @param extendedClass - The name of the class that the UI plugin extends, e.g. "View"
+     * 
+     * React NativeScript registers views in much the same way as Vue does.
+     * @see https://github.com/rigor789/nativescript-vue-next/blob/master/packages/runtime/src/registry.ts
+     */
+    renderImplementation(
+        packageName: string,
+        exportName: string,
+        extendedClass: string,
+    ): string {
+        const tagName: string = exportName[0].toLowerCase() + exportName.slice(1);
+
+        let meta: string;
+        if(extendedClass === "ContentView"){
+            meta = `    {
+      viewFlags: NSVViewFlags.CONTENT_VIEW,
+    }`;
+        } else if(extendedClass === "LayoutBase"){
+            meta = `    {
+      viewFlags: NSVViewFlags.LAYOUT_VIEW,
+    }`;
+        /* TODO: handle this case. NativeScript Vue's Node model doesn't seem to handle it yet. */
+        // } else if(extendedClass === "TextBase"){
+        } else {
+            /*
+             * e.g. The case if it extends View.
+             * Ideally we should infer potential relationships. SideDrawer has two properties:
+             *   drawerContent?: string | View;
+             *   mainContent?: string | View;
+             * 
+             */
+            meta = `    {
+      nodeOps: {
+        insert(child: NSVElement, parent: NSVElement, atIndex?: number): void {
+          // You need to fill this in!
+        },
+        remove(child: NSVElement, parent: NSVElement): void {
+          // You need to fill this in!
+        }
+      }
+    }`;
+        }
+
+
+        return `import { registerElement, NSVElement, NSVViewFlags } from "react-nativescript";
+
+registerElement(
+    '${tagName}',
+    () => require('${packageName}')["${exportName}"],
+    ${meta}
+);
+`
+    }
 }
 
 function exportCore() {
@@ -46,7 +105,16 @@ function exportModule(moduleName: string) {
     let doc = pluginExporter.buildJSXDocument()
    
     fs.writeFileSync(`./svelte-native-defs/svelte-native-jsx-${moduleName}.d.ts`, svelteRenderer.render(doc));
-    fs.writeFileSync(`./react-nativescript-defs/react-nativescript-jsx-${moduleName}.ts`, rnsRenderer.render(doc));
+    if(moduleName === "nativescript-ui-sidedrawer"){
+        const implementation: string = rnsRenderer.renderImplementation(
+            moduleName,
+            "RadSideDrawer",
+            "View"
+        );
+        fs.writeFileSync(`./react-nativescript-defs/react-nativescript-jsx-${moduleName}.ts`, rnsRenderer.render(doc) + "\n\n" + implementation);
+    } else {
+        fs.writeFileSync(`./react-nativescript-defs/react-nativescript-jsx-${moduleName}.ts`, rnsRenderer.render(doc));
+    }
 }
 
 
